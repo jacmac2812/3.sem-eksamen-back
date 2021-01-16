@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/Fhurup/CA3_startcode.svg?branch=master)](https://travis-ci.com/Fhurup/CA3_startcode)
+[![Build Status](https://travis-ci.com/jacmac2812/3.sem-eksamen-back.svg?branch=master)](https://travis-ci.com/jacmac2812/3.sem-eksamen-back)
 
 
 
