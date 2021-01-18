@@ -130,7 +130,7 @@ public class DemoResourceTest {
                 .body(equalTo("[3]"));
     }
 
-    @Test
+//    @Test
     public void testGetSwabi() throws Exception {
         given()
                 .contentType("application/json")
@@ -145,7 +145,7 @@ public class DemoResourceTest {
                 .body("planetPopulation", equalTo("200000"));
     }
 
-    @Test
+//    @Test
     public void testGetJokes() {
         login("user", "test");
         given()
