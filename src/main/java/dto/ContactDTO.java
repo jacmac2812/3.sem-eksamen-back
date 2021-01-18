@@ -1,40 +1,35 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package dto;
 
 import entities.Contact;
 
-/**
- *
- * @author jacobsimonsen
- */
 public class ContactDTO {
 
-    String name;
-    String email;
-    String company;
-    String jobtitle;
-    String phoneNumber;
-    String password;
+    private int id;
+    private String name;
+    private String email;
+    private String company;
+    private String jobtitle;
+    private String phone;
 
-    public ContactDTO(String name, String password, String email, String company, String jobtitle, String phoneNumber) {
-        this.name = name;
-        this.password = password;
-        this.email = email;
-        this.company = company;
-        this.jobtitle = jobtitle;
-        this.phoneNumber = phoneNumber;
+
+    public ContactDTO() {
     }
 
     public ContactDTO(Contact contact) {
-        this.name = contact.getUserName();
+        this.id = contact.getId();
+        this.name = contact.getName();
         this.email = contact.getEmail();
         this.company = contact.getCompany();
         this.jobtitle = contact.getJobtitle();
-        this.phoneNumber = contact.getPhoneNumber();
+        this.phone = contact.getPhone();
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -53,22 +48,6 @@ public class ContactDTO {
         this.email = email;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getCompany() {
         return company;
     }
@@ -85,4 +64,11 @@ public class ContactDTO {
         this.jobtitle = jobtitle;
     }
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
 }

@@ -6,6 +6,7 @@
 package dto;
 
 import entities.Contact;
+import entities.User;
 import java.util.ArrayList;
 import java.util.List;
 

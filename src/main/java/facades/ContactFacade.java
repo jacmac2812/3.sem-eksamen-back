@@ -3,34 +3,23 @@ package facades;
 import dto.ContactDTO;
 import dto.ContactsDTO;
 import entities.Contact;
-import entities.Role;
-import entities.User;
-import errorhandling.MissingInputException;
-import java.util.List;
+import errorhandling.MissingInput;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
-import org.mindrot.jbcrypt.BCrypt;
-import security.errorhandling.AuthenticationException;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * @author jacobsimonsen
- */
 public class ContactFacade {
 
     private static EntityManagerFactory emf;
-
     private static ContactFacade instance;
 
     private ContactFacade() {
     }
 
-    /**
-     *
-     * @param _emf
-     * @return the instance of this facade.
-     */
-    public static ContactFacade getContactFacade(EntityManagerFactory _emf) {
+    public static ContactFacade getCrmFacade(EntityManagerFactory _emf) {
         if (instance == null) {
             emf = _emf;
             instance = new ContactFacade();
@@ -38,116 +27,111 @@ public class ContactFacade {
         return instance;
     }
 
-    public Contact getVeryfiedContact(String contactname, String password) throws AuthenticationException {
-        EntityManager em = emf.createEntityManager();
-        Contact contact;
-        try {
-            contact = em.find(Contact.class, contactname);
-            if (contact == null || !contact.verifyPassword(password)) {
-                throw new AuthenticationException("Invalid user name or password");
-            }
-        } finally {
-            em.close();
-        }
-        return contact;
-    }
+    public ContactDTO addContact(ContactDTO contactDTO) throws MissingInput {
 
-    public ContactDTO createContact(String name, String password, String email, String company, String jobtitle, String phoneNumber) throws MissingInputException {
-        
-        if (name.length() == 0 || password.length() == 0) {
-            throw new MissingInputException("Name and/or password is missing");
-        }
-        if (email.length() == 0 || email.contains("@") == false) {
-            throw new MissingInputException("Email missing and/or does not contain @");
-        }
-        if (company.length() == 0 || jobtitle.length() == 0) {
-            throw new MissingInputException("Company and/or jobtile is missing");
-        }
-        if (phoneNumber.length() != 8) {
-            throw new MissingInputException("Phonenumber is the wrong length");
-        }
-        
         EntityManager em = emf.createEntityManager();
 
-        try {
+        isInputValid(contactDTO);
 
-            Contact c = new Contact(name, password, email, company, jobtitle, phoneNumber);
-            Role userRole = new Role("user");
+        Contact newContact = prepareContact(contactDTO);
 
-            c.addRole(userRole);
+        try{
             em.getTransaction().begin();
-
-            em.persist(c);
-
+            em.persist(newContact);
             em.getTransaction().commit();
-
-            return new ContactDTO(c);
-        } finally {
+            return new ContactDTO(newContact);
+        }finally {
             em.close();
         }
+
     }
 
-    public ContactDTO deleteContact(String name) {
-        EntityManager em = emf.createEntityManager();
-
-        try {
-            Contact contact = em.find(Contact.class, name);
-
-            em.getTransaction().begin();
-
-            em.remove(contact);
-
-            em.getTransaction().commit();
-
-            ContactDTO cDTO = new ContactDTO(contact);
-
-            return cDTO;
-
-        } finally {
-            em.close();
-        }
-    }
-
-//    public UserDTO editUser(UserDTO u, String name) {
-//        EntityManager em = emf.createEntityManager();
-//
-//        try {
-//            User user = em.find(User.class, name);
-//            
-//            if (u.getPassword().length() != 0) {
-//                user.setUserPass(BCrypt.hashpw(u.getPassword(), BCrypt.gensalt(5)));
-//            }
-//            
-//            if (u.getEmail().length() != 0 || u.getEmail().contains("@") == true) {
-//                user.setEmail(u.getEmail());
-//            }
-//            
-//            if (u.getPhoneNumber().length() != 0) {
-//                user.setPhoneNumber(u.getPhoneNumber());
-//            }            
-//
-//            em.getTransaction().begin();
-//
-//            em.persist(user);
-//
-//            em.getTransaction().commit();
-//
-//            UserDTO uDTO = new UserDTO(user);
-//            return uDTO;
-//        } finally {
-//            em.close();
-//        }
-//    }
-//
     public ContactsDTO getAllContacts() {
         EntityManager em = emf.createEntityManager();
         try {
-            TypedQuery<Contact> query = em.createQuery("SELECT u FROM User u", entities.Contact.class);
-            List<Contact> contacts = query.getResultList();
-            ContactsDTO all = new ContactsDTO(contacts);
+            TypedQuery<Contact> query = em.createQuery("SELECT c FROM Contact c", entities.Contact.class);
+            List<Contact> contact = query.getResultList();
+            ContactsDTO all = new ContactsDTO(contact);
             return all;
         } finally {
             em.close();
         }
     }
+
+
+    public ContactDTO getContactById (int id ) {
+
+        EntityManager em = emf.createEntityManager();
+
+        Contact contact = em.find(Contact.class, id);
+
+        return new ContactDTO(contact);
+    }
+
+    public ContactDTO editContact (ContactDTO c) throws MissingInput {
+        EntityManager em = emf.createEntityManager();
+        isInputValid(c);
+        Contact contact = em.find(Contact.class, c.getId());
+
+        contact.setName(c.getName());
+        contact.setEmail(c.getEmail());
+        contact.setCompany(c.getCompany());
+        contact.setJobtitle(c.getJobtitle());
+        contact.setPhone(c.getPhone());
+
+        try{
+            em.getTransaction().begin();
+            em.persist(contact);
+            em.getTransaction().commit();
+            return new ContactDTO(contact);
+        }
+        finally {
+            em.close();
+        }
+
+    }
+
+    public ContactDTO deleteContact (int id) {
+
+        EntityManager em = emf.createEntityManager();
+
+        Contact contact = em.find(Contact.class, id);
+
+        try {
+            em.getTransaction().begin();
+            em.remove(contact);
+            em.getTransaction().commit();
+            return new ContactDTO(contact);
+        }finally {
+            em.close();
+        }
+
+    }
+
+
+    private Contact prepareContact(ContactDTO contactDTO) {
+        Contact newContact = new Contact(contactDTO.getName(), contactDTO.getEmail(), contactDTO.getCompany(), contactDTO.getJobtitle(), contactDTO.getPhone());
+        return newContact;
+    }
+
+
+
+    private void isInputValid(ContactDTO contactDTO) throws MissingInput {
+        if(contactDTO.getName().length() < 2){
+            throw new MissingInput("Please enter at least 2 characters in name");
+        }
+        if(!contactDTO.getEmail().contains("@")){
+            throw new MissingInput("Please enter a valid Email Address");
+        }
+        if(contactDTO.getCompany().length() < 1){
+            throw new MissingInput("Please enter a valid company");
+        }
+        if(contactDTO.getJobtitle().length() < 1){
+            throw new MissingInput("Please enter at least 2 characters in Job Title");
+        }
+        if(contactDTO.getPhone().length() < 8 ){
+            throw new MissingInput("Please enter a valid phone number");
+        }
+    }
+
 }
