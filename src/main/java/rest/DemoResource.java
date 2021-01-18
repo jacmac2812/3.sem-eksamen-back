@@ -4,16 +4,22 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dto.ChuckDTO;
 import dto.CombinedDTO;
+import dto.ContactDTO;
+import dto.ContactsDTO;
 import dto.DadDTO;
 import dto.SwabiDTO;
 import entities.Role;
 import entities.User;
+import errorhandling.MissingInputException;
+import facades.ContactFacade;
 import java.io.IOException;
 import java.util.List;
 import javax.annotation.security.RolesAllowed;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Produces;
@@ -21,6 +27,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 import jokefetcher.JokeFetcher;
@@ -38,6 +45,7 @@ public class DemoResource {
     private UriInfo context;
 
     private static EntityManagerFactory emf;
+    private static final ContactFacade FACADE = ContactFacade.getContactFacade(EMF);
 
     @Context
     SecurityContext securityContext;
@@ -66,6 +74,30 @@ public class DemoResource {
         }
     }
 
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("contact")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String createContact(String contact) throws MissingInputException {
+        ContactDTO cDTO = GSON.fromJson(contact, ContactDTO.class);
+        ContactDTO cAdded = FACADE.createContact(cDTO.getName(), cDTO.getPassword(), cDTO.getEmail(), cDTO.getCompany(), cDTO.getJobtitle(), cDTO.getPhoneNumber());
+        return GSON.toJson(cAdded);
+    }
+
+    @Path("/{name}")
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    public String deleteContact(@PathParam("name") String name) {
+        ContactDTO cDeleted = FACADE.deleteContact(name);
+        return GSON.toJson(cDeleted);
+    }
+ @Path("alls")
+    @GET
+    @Produces({MediaType.APPLICATION_JSON})
+    public String getAllContacts() {
+        ContactsDTO csDTO = FACADE.getAllContacts();
+        return GSON.toJson(csDTO);
+    }
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("user")
@@ -82,29 +114,6 @@ public class DemoResource {
     public String getFromAdmin() {
         String thisuser = securityContext.getUserPrincipal().getName();
         return "{\"msg\": \"Hello to (admin) User: " + thisuser + "\"}";
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("jokes")
-    @RolesAllowed("user")
-    public String getJokes() throws IOException {
-        JokeFetcher jf = new JokeFetcher();
-
-        CombinedDTO cDTO = jf.getJokes();
-
-        return GSON.toJson(cDTO);
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("swabi")
-    public String getSwabi() throws IOException {
-        JokeFetcher jf = new JokeFetcher();
-
-        SwabiDTO sDTO = jf.getSwabi();
-
-        return GSON.toJson(sDTO);
     }
 
     @GET

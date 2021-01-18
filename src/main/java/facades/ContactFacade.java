@@ -1,6 +1,7 @@
 package facades;
 
 import dto.ContactDTO;
+import dto.ContactsDTO;
 import entities.Contact;
 import entities.Role;
 import entities.User;
@@ -86,7 +87,7 @@ public class ContactFacade {
         }
     }
 
-    public ContactDTO deleteUser(String name) {
+    public ContactDTO deleteContact(String name) {
         EntityManager em = emf.createEntityManager();
 
         try {
@@ -138,15 +139,15 @@ public class ContactFacade {
 //        }
 //    }
 //
-//    public UsersDTO getAllUsers() {
-//        EntityManager em = emf.createEntityManager();
-//        try {
-//            TypedQuery<User> query = em.createQuery("SELECT u FROM User u", entities.User.class);
-//            List<User> users = query.getResultList();
-//            UsersDTO all = new UsersDTO(users);
-//            return all;
-//        } finally {
-//            em.close();
-//        }
-//    }
+    public ContactsDTO getAllContacts() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Contact> query = em.createQuery("SELECT u FROM User u", entities.Contact.class);
+            List<Contact> contacts = query.getResultList();
+            ContactsDTO all = new ContactsDTO(contacts);
+            return all;
+        } finally {
+            em.close();
+        }
+    }
 }
