@@ -7,6 +7,15 @@ public class ContactDTO {
     private int id;
     private String name;
     private String email;
+
+    public ContactDTO(int id, String name, String email, String company, String jobtitle, String phone) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.company = company;
+        this.jobtitle = jobtitle;
+        this.phone = phone;
+    }
     private String company;
     private String jobtitle;
     private String phone;
