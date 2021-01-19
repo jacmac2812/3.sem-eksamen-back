@@ -95,8 +95,8 @@ public class DemoResource {
         EntityManagerFactory emf = EMF_Creator.createEntityManagerFactory();
         EntityManager em = emf.createEntityManager();
 
-        User user = new User("user", "hello");
-        User admin = new User("admin", "with");
+        User user = new User("test", "test");
+        User admin = new User("jacob", "1234");
         User both = new User("user_admin", "you");
 
         em.getTransaction().begin();
